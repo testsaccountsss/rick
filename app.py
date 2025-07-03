@@ -122,31 +122,38 @@ if submitted:
     )
     ax.add_patch(rect)
 
-    # 이미지 영역 계산 - 더 정확한 중앙 정렬
-    content_x = box_x + 0.04
-    content_w = box_w - 0.08
-    content_y = box_y + 0.04
-    content_h = box_h - 0.08
+    # 레이아웃 영역 설정
+    margin = 0.05
+    content_x = box_x + margin
+    content_w = box_w - 2 * margin
+    content_y = box_y + margin
+    content_h = box_h - 2 * margin
     
-    # 이미지 크기와 위치 (상단 30% 영역 사용)
-    img_area_h = content_h * 0.35
-    img_size = min(content_w * 0.35, img_area_h * 0.8)
-    img_y = content_y + content_h - img_size - 0.02
+    # 이미지 크기 (정사각형으로 고정)
+    img_size = 0.20  # 전체 높이의 20%
+    img_gap = 0.05   # 이미지 간격
     
-    # 이미지 중앙 정렬을 위한 x 좌표 계산
-    left_img_x = content_x + content_w * 0.25 - img_size/2
-    right_img_x = content_x + content_w * 0.75 - img_size/2
+    # 이미지 위치 계산 (상단에 배치)
+    img_y_top = content_y + content_h - img_size - 0.02
+    img_y_bottom = img_y_top
+    
+    # 이미지 x 좌표 (좌우 대칭으로 배치)
+    total_img_width = 2 * img_size + img_gap
+    img_start_x = content_x + (content_w - total_img_width) / 2
+    left_img_x = img_start_x
+    right_img_x = img_start_x + img_size + img_gap
     
     # 이미지 배치
-    ax.imshow(left_img, extent=(left_img_x, left_img_x+img_size, img_y, img_y+img_size), zorder=2)
-    ax.imshow(right_img, extent=(right_img_x, right_img_x+img_size, img_y, img_y+img_size), zorder=2)
+    ax.imshow(left_img, extent=(left_img_x, left_img_x+img_size, img_y_bottom, img_y_top), zorder=2)
+    ax.imshow(right_img, extent=(right_img_x, right_img_x+img_size, img_y_bottom, img_y_top), zorder=2)
 
-    # 이름 텍스트 - 이미지 중앙에 정렬
-    name_y = img_y - 0.03
+    # 이름 텍스트 위치 (이미지 바로 아래)
+    name_y = img_y_bottom - 0.04
     left_name_x = left_img_x + img_size/2
     right_name_x = right_img_x + img_size/2
     vs_x = content_x + content_w/2
     
+    # 이름 텍스트 출력
     ax.text(left_name_x, name_y, left_name, fontsize=18, ha='center', va='top', 
             fontweight='bold', zorder=3, color='#333333')
     ax.text(vs_x, name_y, "VS.", fontsize=28, color='#ff4444', ha='center', va='top', 
@@ -154,21 +161,22 @@ if submitted:
     ax.text(right_name_x, name_y, right_name, fontsize=18, ha='center', va='top', 
             fontweight='bold', zorder=3, color='#333333')
 
-    # VS 아래 구분선
-    line_y = name_y - 0.05
+    # 구분선
+    line_y = name_y - 0.06
     line_x1 = content_x + 0.02
     line_x2 = content_x + content_w - 0.02
     ax.plot([line_x1, line_x2], [line_y, line_y], color='#cccccc', linewidth=2, zorder=3)
 
-    # 비교 항목 영역 계산
+    # 비교 항목들 (구분선 아래)
     n = 3
-    items_start_y = line_y - 0.03
-    items_h = content_y + content_h * 0.15 - items_start_y
+    items_start_y = line_y - 0.05
+    items_end_y = content_y + 0.05
+    items_h = items_start_y - items_end_y
     dy = items_h / n
     
     # 각 항목별 행
     for i in range(n):
-        y = items_start_y - i * dy
+        y = items_start_y - i * dy - dy/2
         
         # 값들을 이름과 동일한 x 좌표에 배치
         ax.text(left_name_x, y, config["left_values"][i], fontsize=16, ha='center', va='center', 
