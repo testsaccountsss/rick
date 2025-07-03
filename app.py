@@ -44,7 +44,22 @@ def save_config(config):
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
 
-st.set_page_config(page_title="VS Meme Generator", layout="wide")
+# 페이지 폭을 70%로 제한 (centered + custom CSS)
+st.set_page_config(page_title="VS Meme Generator", layout="centered")
+st.markdown(
+    """
+    <style>
+    .main .block-container {
+        max-width: 900px;
+        width: 70vw;
+        min-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 st.title("VS Meme Generator")
 
 # --- 입력값 불러오기/초기화 ---
@@ -110,7 +125,7 @@ right_img = get_image(right_img_file, right_img_name)
 
 # --- VS 이미지 생성 및 출력 ---
 if submitted:
-    fig, ax = plt.subplots(figsize=(9, 6))
+    fig, ax = plt.subplots(figsize=(7, 4.7))  # 70% 크기 느낌으로 조정
     ax.axis('off')
 
     # 전체 박스
@@ -130,24 +145,24 @@ if submitted:
     ax.imshow(right_img, extent=(box_x+2*img_gap+img_size, box_x+2*img_gap+2*img_size, img_y, img_y+img_size), zorder=2)
 
     # 이름/VS/이름: 이미지 바로 아래, 같은 높이
-    name_y = img_y - 0.045
-    ax.text(box_x+img_gap+img_size/2, name_y, left_name, fontsize=17, ha='center', va='top', fontweight='bold', zorder=3)
-    ax.text(box_x+box_w/2, name_y, "VS.", fontsize=26, color='red', ha='center', va='top', fontweight='bold', zorder=3)
-    ax.text(box_x+2*img_gap+img_size+img_size/2, name_y, right_name, fontsize=17, ha='center', va='top', fontweight='bold', zorder=3)
+    name_y = img_y - 0.055  # VS 아래 줄과 간격 넉넉히
+    ax.text(box_x+img_gap+img_size/2, name_y, left_name, fontsize=15, ha='center', va='top', fontweight='bold', zorder=3)
+    ax.text(box_x+box_w/2, name_y, "VS.", fontsize=22, color='red', ha='center', va='top', fontweight='bold', zorder=3)
+    ax.text(box_x+2*img_gap+img_size+img_size/2, name_y, right_name, fontsize=15, ha='center', va='top', fontweight='bold', zorder=3)
 
-    # VS 아래 구분선 (항목 줄과 동일)
+    # VS 아래 구분선 (항목 줄과 동일, 간격 넉넉히)
     n = 3
-    dy = (box_h - (img_size + 0.13 + 0.07)) / n
-    line_y = name_y - 0.04
+    dy = (box_h - (img_size + 0.18 + 0.07)) / n  # VS 아래 줄과 항목 첫 줄 간격 넉넉히
+    line_y = name_y - 0.06
     ax.plot([box_x+0.07, box_x+box_w-0.07], [line_y, line_y], color='#cccccc', linewidth=1.2, zorder=3)
 
     # 항목별 행 (값의 x좌표를 이름과 동일하게)
     start_y = line_y - dy/2
     for i in range(n):
         y = start_y - i * dy
-        ax.text(box_x+img_gap+img_size/2, y, config["left_values"][i], fontsize=16, ha='center', va='center', zorder=3)
-        ax.text(box_x+box_w/2, y, config["labels"][i], fontsize=16, ha='center', va='center', fontweight='bold', zorder=3)
-        ax.text(box_x+2*img_gap+img_size+img_size/2, y, config["right_values"][i], fontsize=16, ha='center', va='center', zorder=3)
+        ax.text(box_x+img_gap+img_size/2, y, config["left_values"][i], fontsize=14, ha='center', va='center', zorder=3)
+        ax.text(box_x+box_w/2, y, config["labels"][i], fontsize=14, ha='center', va='center', fontweight='bold', zorder=3)
+        ax.text(box_x+2*img_gap+img_size+img_size/2, y, config["right_values"][i], fontsize=14, ha='center', va='center', zorder=3)
         if i < n-1:
             ax.plot([box_x+0.07, box_x+box_w-0.07], [y-dy/2, y-dy/2], color='#cccccc', linewidth=1.2, zorder=3)
 
