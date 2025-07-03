@@ -44,7 +44,7 @@ def save_config(config):
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
 
-st.set_page_config(page_title="VS Meme Generator", layout="centered")
+st.set_page_config(page_title="VS Meme Generator", layout="wide")
 st.title("VS Meme Generator")
 
 # --- 입력값 불러오기/초기화 ---
@@ -156,7 +156,8 @@ if submitted:
     plt.tight_layout()
 
     buf = io.BytesIO()
-    plt.savefig(buf, format="png", bbox_inches="tight")
+    fig.savefig(buf, format="png", bbox_inches="tight", dpi=200)
+    buf.seek(0)
+    st.image(buf, use_column_width=True)
     plt.close(fig)
-    st.image(buf.getvalue(), caption="VS Meme", use_column_width=True)
     st.success("VS 이미지가 생성되었습니다!")
