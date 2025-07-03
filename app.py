@@ -145,7 +145,7 @@ if submitted:
     ax.plot([0.12, 0.88], [0.58, 0.58], color='#cccccc', linewidth=2, zorder=3)
     
     # 비교 항목들 - 위치와 간격 조정
-    row_positions = [0.48, 0.36, 0.24]
+    row_positions = [0.48, 0.38, 0.28]  # 간격을 줄임 (0.36->0.38, 0.24->0.28)
     
     # 각 열의 x 위치 정의
     left_col_x = left_img_x + img_size/2
@@ -158,14 +158,14 @@ if submitted:
                 fontsize=16, ha='center', va='center', color='#444444', zorder=3)
         # 중앙 라벨
         ax.text(center_col_x, y_pos, config["labels"][i], 
-                fontsize=16, ha='center', va='center', fontweight='bold', color='#222222', zorder=3)
+                fontsize=16, ha='center', va='center', color='#222222', zorder=3)
         # 오른쪽 값
         ax.text(right_col_x, y_pos, config["right_values"][i], 
                 fontsize=16, ha='center', va='center', color='#444444', zorder=3)
         
         # 항목 간 구분선 (더 짧고 연하게)
         if i < len(row_positions) - 1:
-            ax.plot([0.15, 0.85], [y_pos - 0.06, y_pos - 0.06], color='#e8e8e8', linewidth=1, zorder=3)
+            ax.plot([0.15, 0.85], [y_pos - 0.05, y_pos - 0.05], color='#e8e8e8', linewidth=1, zorder=3)  # 간격 줄임
     
     plt.xlim(0, 1)
     plt.ylim(0, 1)
@@ -179,7 +179,7 @@ if submitted:
     # 컬럼을 사용해서 중앙에 배치하고 크기 제한
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        st.image(buf, width=600)  # 고정 폭 설정
+        st.image(buf, width=720)  # 고정 폭 설정 (600 -> 720, 120% 확대)
     
     plt.close(fig)
     st.success("VS 이미지가 생성되었습니다!")
