@@ -13,9 +13,9 @@ DEFAULT_CONFIG = {
     "right_img": "right.png",
     "left_name": "Rick Astley",
     "right_name": "_rickroll",
-    "labels": ["INSTA followers", "Age", "Net worth"],
-    "left_values": ["690k", "23 years", "460k"],
-    "right_values": ["115", "7 days", "1€"]
+    "labels": ["INSTA followers", "Age", "Posts", "Net worth"],
+    "left_values": ["690k", "23 years", "1.2k", "460k"],
+    "right_values": ["115", "7 days", "3", "1€"]
 }
 
 def make_square(img, size=200, color=(255,255,255)):
@@ -35,6 +35,11 @@ def load_config():
             for k in DEFAULT_CONFIG:
                 if k not in config or not config[k]:
                     config[k] = DEFAULT_CONFIG[k]
+            # 기존 3개 항목을 4개로 업데이트
+            if len(config.get("labels", [])) == 3:
+                config["labels"] = DEFAULT_CONFIG["labels"]
+                config["left_values"] = DEFAULT_CONFIG["left_values"]
+                config["right_values"] = DEFAULT_CONFIG["right_values"]
             return config
         except Exception:
             pass
@@ -71,14 +76,17 @@ with st.form("vs_form"):
         label1 = st.text_input("항목1 이름", config["labels"][0])
         label2 = st.text_input("항목2 이름", config["labels"][1])
         label3 = st.text_input("항목3 이름", config["labels"][2])
+        label4 = st.text_input("항목4 이름", config["labels"][3])
     with cols[1]:
         left1 = st.text_input("왼쪽 값1", config["left_values"][0])
         left2 = st.text_input("왼쪽 값2", config["left_values"][1])
         left3 = st.text_input("왼쪽 값3", config["left_values"][2])
+        left4 = st.text_input("왼쪽 값4", config["left_values"][3])
     with cols[2]:
         right1 = st.text_input("오른쪽 값1", config["right_values"][0])
         right2 = st.text_input("오른쪽 값2", config["right_values"][1])
         right3 = st.text_input("오른쪽 값3", config["right_values"][2])
+        right4 = st.text_input("오른쪽 값4", config["right_values"][3])
 
     submitted = st.form_submit_button("VS 이미지 만들기")
 
@@ -88,9 +96,9 @@ config = {
     "right_img": right_img_name,
     "left_name": left_name,
     "right_name": right_name,
-    "labels": [label1, label2, label3],
-    "left_values": [left1, left2, left3],
-    "right_values": [right1, right2, right3]
+    "labels": [label1, label2, label3, label4],
+    "left_values": [left1, left2, left3, left4],
+    "right_values": [right1, right2, right3, right4]
 }
 st.session_state.config = config
 save_config(config)
@@ -111,7 +119,7 @@ right_img = get_image(right_img_file, right_img_name)
 # --- VS 이미지 생성 및 출력 ---
 if submitted:
     # 크기를 줄이고 비율 조정
-    fig, ax = plt.subplots(figsize=(10, 7))
+    fig, ax = plt.subplots(figsize=(10, 8))  # 높이를 8로 증가
     ax.axis('off')
     
     # 전체 배경 박스
@@ -144,8 +152,8 @@ if submitted:
     # 구분선
     ax.plot([0.12, 0.88], [0.58, 0.58], color='#cccccc', linewidth=2, zorder=3)
     
-    # 비교 항목들 - 위치와 간격 조정
-    row_positions = [0.48, 0.38, 0.28]  # 간격을 줄임 (0.36->0.38, 0.24->0.28)
+    # 비교 항목들 - 4개 항목으로 조정
+    row_positions = [0.48, 0.38, 0.28, 0.18]  # 4개 항목으로 간격 조정
     
     # 각 열의 x 위치 정의
     left_col_x = left_img_x + img_size/2
@@ -165,7 +173,7 @@ if submitted:
         
         # 항목 간 구분선 (더 짧고 연하게)
         if i < len(row_positions) - 1:
-            ax.plot([0.15, 0.85], [y_pos - 0.05, y_pos - 0.05], color='#e8e8e8', linewidth=1, zorder=3)  # 간격 줄임
+            ax.plot([0.15, 0.85], [y_pos - 0.05, y_pos - 0.05], color='#e8e8e8', linewidth=1, zorder=3)
     
     plt.xlim(0, 1)
     plt.ylim(0, 1)
