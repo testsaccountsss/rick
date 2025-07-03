@@ -1,0 +1,21 @@
+{
+  "left_img": "left.png",
+  "right_img": "right.png",
+  "left_name": "Rick Astley",
+  "right_name": "_rickroll",
+  "labels": [
+    "INSTA followers",
+    "Age",
+    "Net worth"
+  ],
+  "left_values": [
+    "690k",
+    "23 years",
+    "460k"
+  ],
+  "right_values": [
+    "115",
+    "7 days",
+    "1€"
+  ]
+}
