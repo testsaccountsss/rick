@@ -110,65 +110,76 @@ right_img = get_image(right_img_file, right_img_name)
 
 # --- VS 이미지 생성 및 출력 ---
 if submitted:
-    fig, ax = plt.subplots(figsize=(12, 8))
+    # 크기를 줄이고 비율 조정
+    fig, ax = plt.subplots(figsize=(10, 7))
     ax.axis('off')
     
     # 전체 배경 박스
     rect = patches.FancyBboxPatch(
-        (0.05, 0.05), 0.9, 0.9,
+        (0.08, 0.08), 0.84, 0.84,
         boxstyle="round,pad=0.02", linewidth=2,
         edgecolor='#999999', facecolor='white', zorder=1
     )
     ax.add_patch(rect)
     
-    # 이미지 배치 (상단)
-    img_size = 0.25
-    img_y = 0.65
-    left_img_x = 0.20
-    right_img_x = 0.55
+    # 이미지 배치 (상단) - 위치와 크기 조정
+    img_size = 0.22
+    img_y = 0.68
+    left_img_x = 0.18
+    right_img_x = 0.60
     
     # 이미지 표시
     ax.imshow(left_img, extent=[left_img_x, left_img_x+img_size, img_y, img_y+img_size], zorder=2)
     ax.imshow(right_img, extent=[right_img_x, right_img_x+img_size, img_y, img_y+img_size], zorder=2)
     
-    # 이름 표시 (이미지 아래)
-    name_y = 0.62
-    ax.text(left_img_x + img_size/2, name_y, left_name, fontsize=20, ha='center', va='top', 
+    # 이름 표시 (이미지 아래) - 위치 조정
+    name_y = 0.64
+    ax.text(left_img_x + img_size/2, name_y, left_name, fontsize=18, ha='center', va='top', 
             fontweight='bold', color='#333333', zorder=3)
-    ax.text(0.5, name_y, "VS.", fontsize=30, ha='center', va='top', 
+    ax.text(0.5, name_y, "VS.", fontsize=26, ha='center', va='top', 
             fontweight='bold', color='#ff4444', zorder=3)
-    ax.text(right_img_x + img_size/2, name_y, right_name, fontsize=20, ha='center', va='top', 
+    ax.text(right_img_x + img_size/2, name_y, right_name, fontsize=18, ha='center', va='top', 
             fontweight='bold', color='#333333', zorder=3)
     
     # 구분선
-    ax.plot([0.1, 0.9], [0.55, 0.55], color='#cccccc', linewidth=2, zorder=3)
+    ax.plot([0.12, 0.88], [0.58, 0.58], color='#cccccc', linewidth=2, zorder=3)
     
-    # 비교 항목들
-    row_positions = [0.45, 0.35, 0.25]
+    # 비교 항목들 - 위치와 간격 조정
+    row_positions = [0.48, 0.36, 0.24]
+    
+    # 각 열의 x 위치 정의
+    left_col_x = left_img_x + img_size/2
+    center_col_x = 0.5
+    right_col_x = right_img_x + img_size/2
     
     for i, y_pos in enumerate(row_positions):
         # 왼쪽 값
-        ax.text(left_img_x + img_size/2, y_pos, config["left_values"][i], 
-                fontsize=18, ha='center', va='center', color='#444444', zorder=3)
+        ax.text(left_col_x, y_pos, config["left_values"][i], 
+                fontsize=16, ha='center', va='center', color='#444444', zorder=3)
         # 중앙 라벨
-        ax.text(0.5, y_pos, config["labels"][i], 
-                fontsize=18, ha='center', va='center', fontweight='bold', color='#222222', zorder=3)
+        ax.text(center_col_x, y_pos, config["labels"][i], 
+                fontsize=16, ha='center', va='center', fontweight='bold', color='#222222', zorder=3)
         # 오른쪽 값
-        ax.text(right_img_x + img_size/2, y_pos, config["right_values"][i], 
-                fontsize=18, ha='center', va='center', color='#444444', zorder=3)
+        ax.text(right_col_x, y_pos, config["right_values"][i], 
+                fontsize=16, ha='center', va='center', color='#444444', zorder=3)
         
-        # 항목 간 구분선
+        # 항목 간 구분선 (더 짧고 연하게)
         if i < len(row_positions) - 1:
-            ax.plot([0.1, 0.9], [y_pos - 0.05, y_pos - 0.05], color='#e0e0e0', linewidth=1, zorder=3)
+            ax.plot([0.15, 0.85], [y_pos - 0.06, y_pos - 0.06], color='#e8e8e8', linewidth=1, zorder=3)
     
     plt.xlim(0, 1)
     plt.ylim(0, 1)
     plt.tight_layout()
     
-    # 이미지 저장 및 출력
+    # 이미지 저장 및 출력 - 크기 제한 추가
     buf = io.BytesIO()
-    fig.savefig(buf, format="png", bbox_inches="tight", dpi=200, facecolor='white')
+    fig.savefig(buf, format="png", bbox_inches="tight", dpi=150, facecolor='white')
     buf.seek(0)
-    st.image(buf, use_column_width=True)
+    
+    # 컬럼을 사용해서 중앙에 배치하고 크기 제한
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.image(buf, width=600)  # 고정 폭 설정
+    
     plt.close(fig)
     st.success("VS 이미지가 생성되었습니다!")
