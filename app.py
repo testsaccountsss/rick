@@ -18,7 +18,7 @@ DEFAULT_CONFIG = {
     "right_values": ["115", "7 days", "1€"]
 }
 
-def make_square(img, size=160, color=(255,255,255)):
+def make_square(img, size=200, color=(255,255,255)):
     w, h = img.size
     if w == h:
         return img.resize((size, size))
@@ -102,7 +102,7 @@ def get_image(file, fallback_path):
     elif os.path.exists(fallback_path):
         img = Image.open(fallback_path)
     else:
-        img = Image.new("RGB", (160,160), (220,220,220))
+        img = Image.new("RGB", (200,200), (220,220,220))
     return make_square(img)
 
 left_img = get_image(left_img_file, left_img_name)
@@ -110,94 +110,64 @@ right_img = get_image(right_img_file, right_img_name)
 
 # --- VS 이미지 생성 및 출력 ---
 if submitted:
-    fig, ax = plt.subplots(figsize=(10, 7))
+    fig, ax = plt.subplots(figsize=(12, 8))
     ax.axis('off')
-
-    # 전체 박스 - 더 넓은 마진과 둥근 모서리
-    box_x, box_y, box_w, box_h = 0.05, 0.05, 0.90, 0.90
+    
+    # 전체 배경 박스
     rect = patches.FancyBboxPatch(
-        (box_x, box_y), box_w, box_h,
-        boxstyle="round,pad=0.015", linewidth=2.5,
+        (0.05, 0.05), 0.9, 0.9,
+        boxstyle="round,pad=0.02", linewidth=2,
         edgecolor='#999999', facecolor='white', zorder=1
     )
     ax.add_patch(rect)
-
-    # 레이아웃 영역 설정
-    margin = 0.05
-    content_x = box_x + margin
-    content_w = box_w - 2 * margin
-    content_y = box_y + margin
-    content_h = box_h - 2 * margin
     
-    # 이미지 크기 (정사각형으로 고정)
-    img_size = 0.20  # 전체 높이의 20%
-    img_gap = 0.05   # 이미지 간격
+    # 이미지 배치 (상단)
+    img_size = 0.25
+    img_y = 0.65
+    left_img_x = 0.20
+    right_img_x = 0.55
     
-    # 이미지 위치 계산 (상단에 배치)
-    img_y_top = content_y + content_h - img_size - 0.02
-    img_y_bottom = img_y_top
+    # 이미지 표시
+    ax.imshow(left_img, extent=[left_img_x, left_img_x+img_size, img_y, img_y+img_size], zorder=2)
+    ax.imshow(right_img, extent=[right_img_x, right_img_x+img_size, img_y, img_y+img_size], zorder=2)
     
-    # 이미지 x 좌표 (좌우 대칭으로 배치)
-    total_img_width = 2 * img_size + img_gap
-    img_start_x = content_x + (content_w - total_img_width) / 2
-    left_img_x = img_start_x
-    right_img_x = img_start_x + img_size + img_gap
+    # 이름 표시 (이미지 아래)
+    name_y = 0.62
+    ax.text(left_img_x + img_size/2, name_y, left_name, fontsize=20, ha='center', va='top', 
+            fontweight='bold', color='#333333', zorder=3)
+    ax.text(0.5, name_y, "VS.", fontsize=30, ha='center', va='top', 
+            fontweight='bold', color='#ff4444', zorder=3)
+    ax.text(right_img_x + img_size/2, name_y, right_name, fontsize=20, ha='center', va='top', 
+            fontweight='bold', color='#333333', zorder=3)
     
-    # 이미지 배치
-    ax.imshow(left_img, extent=(left_img_x, left_img_x+img_size, img_y_bottom, img_y_top), zorder=2)
-    ax.imshow(right_img, extent=(right_img_x, right_img_x+img_size, img_y_bottom, img_y_top), zorder=2)
-
-    # 이름 텍스트 위치 (이미지 바로 아래)
-    name_y = img_y_bottom - 0.04
-    left_name_x = left_img_x + img_size/2
-    right_name_x = right_img_x + img_size/2
-    vs_x = content_x + content_w/2
-    
-    # 이름 텍스트 출력
-    ax.text(left_name_x, name_y, left_name, fontsize=18, ha='center', va='top', 
-            fontweight='bold', zorder=3, color='#333333')
-    ax.text(vs_x, name_y, "VS.", fontsize=28, color='#ff4444', ha='center', va='top', 
-            fontweight='bold', zorder=3)
-    ax.text(right_name_x, name_y, right_name, fontsize=18, ha='center', va='top', 
-            fontweight='bold', zorder=3, color='#333333')
-
     # 구분선
-    line_y = name_y - 0.06
-    line_x1 = content_x + 0.02
-    line_x2 = content_x + content_w - 0.02
-    ax.plot([line_x1, line_x2], [line_y, line_y], color='#cccccc', linewidth=2, zorder=3)
-
-    # 비교 항목들 (구분선 아래)
-    n = 3
-    items_start_y = line_y - 0.05
-    items_end_y = content_y + 0.05
-    items_h = items_start_y - items_end_y
-    dy = items_h / n
+    ax.plot([0.1, 0.9], [0.55, 0.55], color='#cccccc', linewidth=2, zorder=3)
     
-    # 각 항목별 행
-    for i in range(n):
-        y = items_start_y - i * dy - dy/2
+    # 비교 항목들
+    row_positions = [0.45, 0.35, 0.25]
+    
+    for i, y_pos in enumerate(row_positions):
+        # 왼쪽 값
+        ax.text(left_img_x + img_size/2, y_pos, config["left_values"][i], 
+                fontsize=18, ha='center', va='center', color='#444444', zorder=3)
+        # 중앙 라벨
+        ax.text(0.5, y_pos, config["labels"][i], 
+                fontsize=18, ha='center', va='center', fontweight='bold', color='#222222', zorder=3)
+        # 오른쪽 값
+        ax.text(right_img_x + img_size/2, y_pos, config["right_values"][i], 
+                fontsize=18, ha='center', va='center', color='#444444', zorder=3)
         
-        # 값들을 이름과 동일한 x 좌표에 배치
-        ax.text(left_name_x, y, config["left_values"][i], fontsize=16, ha='center', va='center', 
-                zorder=3, color='#444444', fontweight='500')
-        ax.text(vs_x, y, config["labels"][i], fontsize=16, ha='center', va='center', 
-                fontweight='bold', zorder=3, color='#222222')
-        ax.text(right_name_x, y, config["right_values"][i], fontsize=16, ha='center', va='center', 
-                zorder=3, color='#444444', fontweight='500')
-        
-        # 항목 간 구분선 (마지막 항목 제외)
-        if i < n-1:
-            sep_y = y - dy/2
-            ax.plot([line_x1, line_x2], [sep_y, sep_y], color='#e0e0e0', linewidth=1, zorder=3)
-
+        # 항목 간 구분선
+        if i < len(row_positions) - 1:
+            ax.plot([0.1, 0.9], [y_pos - 0.05, y_pos - 0.05], color='#e0e0e0', linewidth=1, zorder=3)
+    
     plt.xlim(0, 1)
     plt.ylim(0, 1)
     plt.tight_layout()
-
+    
     # 이미지 저장 및 출력
     buf = io.BytesIO()
-    fig.savefig(buf, format="png", bbox_inches="tight", dpi=250, facecolor='white')
+    fig.savefig(buf, format="png", bbox_inches="tight", dpi=200, facecolor='white')
     buf.seek(0)
     st.image(buf, use_column_width=True)
     plt.close(fig)
