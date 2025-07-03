@@ -2,6 +2,7 @@ import streamlit as st
 from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import matplotlib.table as tbl
 import json
 import os
 import io
@@ -44,16 +45,14 @@ def save_config(config):
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
 
-st.set_page_config(page_title="VS Meme Generator", layout="wide")
+st.set_page_config(page_title="VS Meme Generator", layout="centered")
 st.title("VS Meme Generator")
 
-# --- 입력값 불러오기/초기화 ---
 if "config" not in st.session_state:
     st.session_state.config = load_config()
 
 config = st.session_state.config
 
-# --- 입력 폼 ---
 with st.form("vs_form"):
     col1, col2 = st.columns(2)
     with col1:
@@ -82,7 +81,6 @@ with st.form("vs_form"):
 
     submitted = st.form_submit_button("VS 이미지 만들기")
 
-# --- 입력값 저장 ---
 config = {
     "left_img": left_img_name,
     "right_img": right_img_name,
@@ -95,7 +93,6 @@ config = {
 st.session_state.config = config
 save_config(config)
 
-# --- 이미지 불러오기 ---
 def get_image(file, fallback_path):
     if file is not None:
         img = Image.open(file)
@@ -108,56 +105,68 @@ def get_image(file, fallback_path):
 left_img = get_image(left_img_file, left_img_name)
 right_img = get_image(right_img_file, right_img_name)
 
-# --- VS 이미지 생성 및 출력 ---
 if submitted:
-    fig, ax = plt.subplots(figsize=(9, 6))
+    n = 3
+    cell_h = 0.18  # 표 셀 높이
+    fig, ax = plt.subplots(figsize=(6.5, 4.5))
     ax.axis('off')
 
-    # 전체 박스
-    box_x, box_y, box_w, box_h = 0.08, 0.10, 0.84, 0.80
-    rect = patches.FancyBboxPatch(
-        (box_x, box_y), box_w, box_h,
-        boxstyle="round,pad=0.02", linewidth=2,
-        edgecolor='#bbbbbb', facecolor='white', zorder=1
-    )
-    ax.add_patch(rect)
-
-    # 이미지: 정사각형, 윗줄 꽉 채우기
-    img_gap = 0.03
-    img_size = (box_w - 3*img_gap) / 2
-    img_y = box_y + box_h - img_size - img_gap
-    ax.imshow(left_img, extent=(box_x+img_gap, box_x+img_gap+img_size, img_y, img_y+img_size), zorder=2)
-    ax.imshow(right_img, extent=(box_x+2*img_gap+img_size, box_x+2*img_gap+2*img_size, img_y, img_y+img_size), zorder=2)
-
-    # 이름/VS/이름: 이미지 바로 아래, 같은 높이
-    name_y = img_y - 0.045
-    ax.text(box_x+img_gap+img_size/2, name_y, left_name, fontsize=17, ha='center', va='top', fontweight='bold', zorder=3)
-    ax.text(box_x+box_w/2, name_y, "VS.", fontsize=26, color='red', ha='center', va='top', fontweight='bold', zorder=3)
-    ax.text(box_x+2*img_gap+img_size+img_size/2, name_y, right_name, fontsize=17, ha='center', va='top', fontweight='bold', zorder=3)
-
-    # VS 아래 구분선 (항목 줄과 동일)
-    n = 3
-    dy = (box_h - (img_size + 0.13 + 0.07)) / n
-    line_y = name_y - 0.04
-    ax.plot([box_x+0.07, box_x+box_w-0.07], [line_y, line_y], color='#cccccc', linewidth=1.2, zorder=3)
-
-    # 항목별 행 (값의 x좌표를 이름과 동일하게)
-    start_y = line_y - dy/2
+    # 표 데이터 구성
+    table_data = []
     for i in range(n):
-        y = start_y - i * dy
-        ax.text(box_x+img_gap+img_size/2, y, config["left_values"][i], fontsize=16, ha='center', va='center', zorder=3)
-        ax.text(box_x+box_w/2, y, config["labels"][i], fontsize=16, ha='center', va='center', fontweight='bold', zorder=3)
-        ax.text(box_x+2*img_gap+img_size+img_size/2, y, config["right_values"][i], fontsize=16, ha='center', va='center', zorder=3)
-        if i < n-1:
-            ax.plot([box_x+0.07, box_x+box_w-0.07], [y-dy/2, y-dy/2], color='#cccccc', linewidth=1.2, zorder=3)
+        table_data.append([
+            config["left_values"][i],
+            config["labels"][i],
+            config["right_values"][i]
+        ])
 
-    plt.xlim(0, 1)
-    plt.ylim(0, 1)
-    plt.tight_layout()
+    # 표 생성 (3행 3열)
+    table = ax.table(
+        cellText=table_data,
+        colLabels=[config["left_name"], "VS.", config["right_name"]],
+        cellLoc='center',
+        loc='center',
+        cellColours=[["#fff"]*3 for _ in range(n)],
+        colColours=["#f5f5f5", "#fff0f0", "#f5f5f5"]
+    )
+
+    # 표 스타일 조정
+    table.auto_set_font_size(False)
+    table.set_fontsize(15)
+    table.scale(1.2, 2.1)
+
+    # 헤더(이름/VS) 폰트 크기/색상
+    for (row, col), cell in table.get_celld().items():
+        if row == 0:
+            cell.set_fontsize(17)
+            cell.set_text_props(weight='bold')
+        if col == 1:
+            cell.set_text_props(color='red', weight='bold')
+        if row == -1:
+            cell.set_height(0.13)
+        else:
+            cell.set_height(cell_h)
+        cell.set_linewidth(1.2)
+        cell.set_edgecolor("#cccccc")
+
+    # 이미지 배치 (왼쪽/오른쪽 헤더 셀 위에)
+    # 좌표: (x, y, w, h) = (0, 1, 1, 1) 등으로 표 위에 이미지 오버레이
+    table_pos = table.get_window_extent(fig.canvas.get_renderer())
+    ax_pos = ax.get_position()
+    # 이미지 위치는 표의 좌상단/우상단에 맞춰서 배치
+    img_y = 0.82
+    img_size = 0.18
+    ax.imshow(left_img, extent=(-0.05, 0.25, img_y, img_y+img_size), zorder=10)
+    ax.imshow(right_img, extent=(0.75, 1.05, img_y, img_y+img_size), zorder=10)
+
+    # VS. 텍스트 강조 (헤더 셀 중앙)
+    ax.text(0.5, 0.97, "VS.", fontsize=24, color='red', ha='center', va='center', fontweight='bold', zorder=11)
+
+    plt.subplots_adjust(left=0.05, right=0.95, top=0.92, bottom=0.08)
 
     buf = io.BytesIO()
-    fig.savefig(buf, format="png", bbox_inches="tight", dpi=200)
+    fig.savefig(buf, format="png", bbox_inches="tight", dpi=180)
     buf.seek(0)
-    st.image(buf, use_column_width=True)
+    st.image(buf, width=540)
     plt.close(fig)
     st.success("VS 이미지가 생성되었습니다!")
