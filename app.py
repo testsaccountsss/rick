@@ -18,7 +18,7 @@ DEFAULT_CONFIG = {
     "right_values": ["115", "7 days", "1€"]
 }
 
-def make_square(img, size=160, color=(255,255,255)):
+def make_square(img, size=180, color=(255,255,255)):
     w, h = img.size
     if w == h:
         return img.resize((size, size))
@@ -117,7 +117,7 @@ def get_image(file, fallback_path):
     elif os.path.exists(fallback_path):
         img = Image.open(fallback_path)
     else:
-        img = Image.new("RGB", (160,160), (220,220,220))
+        img = Image.new("RGB", (180,180), (220,220,220))
     return make_square(img)
 
 left_img = get_image(left_img_file, left_img_name)
@@ -145,24 +145,24 @@ if submitted:
     ax.imshow(right_img, extent=(box_x+2*img_gap+img_size, box_x+2*img_gap+2*img_size, img_y, img_y+img_size), zorder=2)
 
     # 이름/VS/이름: 이미지 바로 아래, 같은 높이
-    name_y = img_y - 0.055  # VS 아래 줄과 간격 넉넉히
-    ax.text(box_x+img_gap+img_size/2, name_y, left_name, fontsize=15, ha='center', va='top', fontweight='bold', zorder=3)
-    ax.text(box_x+box_w/2, name_y, "VS.", fontsize=22, color='red', ha='center', va='top', fontweight='bold', zorder=3)
-    ax.text(box_x+2*img_gap+img_size+img_size/2, name_y, right_name, fontsize=15, ha='center', va='top', fontweight='bold', zorder=3)
+    name_y = img_y - 0.07  # VS 아래 줄과 간격 넉넉히
+    ax.text(box_x+img_gap+img_size/2, name_y, left_name, fontsize=18, ha='center', va='top', fontweight='bold', zorder=3)
+    ax.text(box_x+box_w/2, name_y, "VS.", fontsize=28, color='red', ha='center', va='top', fontweight='bold', zorder=3)
+    ax.text(box_x+2*img_gap+img_size+img_size/2, name_y, right_name, fontsize=18, ha='center', va='top', fontweight='bold', zorder=3)
 
     # VS 아래 구분선 (항목 줄과 동일, 간격 넉넉히)
     n = 3
-    dy = (box_h - (img_size + 0.18 + 0.07)) / n  # VS 아래 줄과 항목 첫 줄 간격 넉넉히
-    line_y = name_y - 0.06
-    ax.plot([box_x+0.07, box_x+box_w-0.07], [line_y, line_y], color='#cccccc', linewidth=1.2, zorder=3)
+    dy = (box_h - (img_size + 0.22 + 0.07)) / n  # VS 아래 줄과 항목 첫 줄 간격 넉넉히
+    line_y = name_y - 0.08
+    ax.plot([box_x+0.07, box_x+box_w-0.07], [line_y, line_y], color='#cccccc', linewidth=1.3, zorder=3)
 
     # 항목별 행 (값의 x좌표를 이름과 동일하게)
     start_y = line_y - dy/2
     for i in range(n):
         y = start_y - i * dy
-        ax.text(box_x+img_gap+img_size/2, y, config["left_values"][i], fontsize=14, ha='center', va='center', zorder=3)
-        ax.text(box_x+box_w/2, y, config["labels"][i], fontsize=14, ha='center', va='center', fontweight='bold', zorder=3)
-        ax.text(box_x+2*img_gap+img_size+img_size/2, y, config["right_values"][i], fontsize=14, ha='center', va='center', zorder=3)
+        ax.text(box_x+img_gap+img_size/2, y, config["left_values"][i], fontsize=16, ha='center', va='center', zorder=3)
+        ax.text(box_x+box_w/2, y, config["labels"][i], fontsize=16, ha='center', va='center', fontweight='bold', zorder=3)
+        ax.text(box_x+2*img_gap+img_size+img_size/2, y, config["right_values"][i], fontsize=16, ha='center', va='center', zorder=3)
         if i < n-1:
             ax.plot([box_x+0.07, box_x+box_w-0.07], [y-dy/2, y-dy/2], color='#cccccc', linewidth=1.2, zorder=3)
 
@@ -171,7 +171,7 @@ if submitted:
     plt.tight_layout()
 
     buf = io.BytesIO()
-    fig.savefig(buf, format="png", bbox_inches="tight", dpi=200)
+    fig.savefig(buf, format="png", bbox_inches="tight", dpi=220)
     buf.seek(0)
     st.image(buf, use_column_width=True)
     plt.close(fig)
